@@ -3,7 +3,7 @@ import SwiftUI
 import Combine
 import Carbon.HIToolbox
 
-class AppDelegate: NSObject, NSApplicationDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     private var statusItem: NSStatusItem!
     private var popover: NSPopover!
     private let appState = AppState()
@@ -66,6 +66,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         popover.contentSize = NSSize(width: 280, height: 475)
         popover.behavior = .transient
         popover.appearance = NSAppearance(named: .darkAqua)
+        popover.delegate = self
         popover.contentViewController = NSHostingController(
             rootView: PopoverView(
                 appState: appState,
@@ -573,10 +574,35 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if popover.isShown {
             popover.performClose(sender)
         } else {
-            popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+            let anchor = button.superview ?? button
+            popover.show(relativeTo: anchor.bounds, of: anchor, preferredEdge: .minY)
+            snapPopoverToStatusItem()
             popover.contentViewController?.view.window?.makeKeyAndOrderFront(nil)
             checkForUpdates()
         }
+    }
+
+    func popoverWillShow(_ notification: Notification) {
+        snapPopoverToStatusItem()
+    }
+
+    func popoverDidShow(_ notification: Notification) {
+        snapPopoverToStatusItem()
+    }
+
+    /// NSPopover clamps to the desktop below the menu bar; `relativeTo:` cannot
+    /// close that gap. Move the popover window so its top sits on the status
+    /// item. Animation and the arrow stay enabled.
+    private func snapPopoverToStatusItem() {
+        guard let button = statusItem.button,
+              let statusWindow = button.window,
+              let popoverWindow = popover.contentViewController?.view.window
+        else { return }
+
+        popoverWindow.animationBehavior = .none
+        var frame = popoverWindow.frame
+        frame.origin.y = statusWindow.frame.minY - frame.height
+        popoverWindow.setFrame(frame, display: true)
     }
 
     // MARK: - Update check
