@@ -1,3 +1,4 @@
+
 import AppKit
 import SwiftUI
 
@@ -24,12 +25,11 @@ final class CleanupWindowController: NSWindowController, NSWindowDelegate {
         WindowSizing.constrain(window,
                                preferred: NSSize(width: 700, height: 540),
                                minSize: NSSize(width: 680, height: 500))
-        window.center()
         self.init(window: window)
         window.delegate = self
     }
 
-    func showFocused() {
+    func showFocused(on screen: NSScreen?) {
         // Wire up content lazily so `self` is fully initialised before the closure captures it.
         if window?.contentViewController == nil {
             let controller = self
@@ -40,8 +40,10 @@ final class CleanupWindowController: NSWindowController, NSWindowDelegate {
         }
         NSApp.setActivationPolicy(.regular)
         NSApp.activate(ignoringOtherApps: true)
+        if let window { WindowSizing.center(window, on: screen) }
         showWindow(nil)
         window?.makeKeyAndOrderFront(nil)
+        if let window { WindowSizing.center(window, on: screen, reapply: true) }
     }
 
     // MARK: - AI Query windows

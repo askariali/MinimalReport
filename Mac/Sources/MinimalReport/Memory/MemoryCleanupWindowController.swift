@@ -15,7 +15,6 @@ final class MemoryCleanupWindowController: NSWindowController, NSWindowDelegate 
         window.title = "Memory Cleanup"
         window.appearance = NSAppearance(named: .darkAqua)
         window.isMovableByWindowBackground = true
-        window.center()
 
         self.init(window: window)
         window.delegate = self
@@ -24,11 +23,13 @@ final class MemoryCleanupWindowController: NSWindowController, NSWindowDelegate 
         window.contentViewController = NSHostingController(rootView: content)
     }
 
-    func showFocused() {
+    func showFocused(on screen: NSScreen?) {
         NSApp.setActivationPolicy(.regular)
         NSApp.activate(ignoringOtherApps: true)
+        if let window { WindowSizing.center(window, on: screen) }
         showWindow(nil)
         window?.makeKeyAndOrderFront(nil)
+        if let window { WindowSizing.center(window, on: screen, reapply: true) }
     }
 
     func windowWillClose(_ notification: Notification) {

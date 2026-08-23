@@ -528,43 +528,53 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         }
     }
 
+    /// Screen the popover (or its status-item anchor) is on. Read before
+    /// closing the popover so the window is not already gone.
+    private var popoverScreen: NSScreen? {
+        popover.contentViewController?.view.window?.screen
+            ?? statusItem.button?.window?.screen
+    }
+
     // MARK: - Disk Cleanup window
 
     @MainActor
     private func openCleanup() {
+        let screen = popoverScreen
         popover.performClose(nil)
         if cleanupWindowController == nil {
             let wc = CleanupWindowController()
             wc.onClose = { [weak self] in self?.cleanupWindowController = nil }
             cleanupWindowController = wc
         }
-        cleanupWindowController?.showFocused()
+        cleanupWindowController?.showFocused(on: screen)
     }
 
     // MARK: - Memory Cleanup window
 
     @MainActor
     private func openMemoryCleanup() {
+        let screen = popoverScreen
         popover.performClose(nil)
         if memoryCleanupWindowController == nil {
             let wc = MemoryCleanupWindowController()
             wc.onClose = { [weak self] in self?.memoryCleanupWindowController = nil }
             memoryCleanupWindowController = wc
         }
-        memoryCleanupWindowController?.showFocused()
+        memoryCleanupWindowController?.showFocused(on: screen)
     }
 
     // MARK: - Settings window
 
     @MainActor
     private func openSettings() {
+        let screen = popoverScreen
         popover.performClose(nil)
         if settingsWindowController == nil {
             let wc = SettingsWindowController()
             wc.onClose = { [weak self] in self?.settingsWindowController = nil }
             settingsWindowController = wc
         }
-        settingsWindowController?.showFocused()
+        settingsWindowController?.showFocused(on: screen)
     }
 
     // MARK: - Popover toggle

@@ -45,9 +45,9 @@ final class AIQueryWindowController: NSWindowController, NSWindowDelegate {
                 y: pw.minY + (pw.height - ww.height) / 2
             )
             // Clamp so the window can never open partially off-screen.
-            window?.setFrameOrigin(WindowSizing.clampedOrigin(for: ww, near: candidate))
-        } else {
-            window?.center()
+            window?.setFrameOrigin(WindowSizing.clampedOrigin(for: ww, near: candidate, on: parent.screen))
+        } else if let window {
+            WindowSizing.center(window, on: window.screen)
         }
         window?.makeKeyAndOrderFront(nil)
     }
